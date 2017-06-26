@@ -1,0 +1,59 @@
+<header class="row">
+  <div class="col-sm-5">
+    <h3>Search Jobs</h3>
+  </div>
+  <% if @jobs.size > 0 && @total_size > @count %>
+    <div class="col-sm-4">
+      <%= render(:erb, Sidekiq::AzSidekiq::ViewHelper.local_view('_paging.erb'), locals: { url: "#{root_path}search?type=#{params[:type]}" } ) %>
+    </div>
+  <% end %>
+  <div class="sm-col-3 pull-right" style="display: inline; margin: 25px 15px 0 0;">
+  Search:
+    <form method="POST" action='<%= request.base_url %>/search?type=<%= params[:type] %>' style="display: inline-block">
+      <input class="search" type="search" name="search" value="<%= params[:search] %>" placeholder="Any job content"/>
+    </form>
+  </div>
+</header>
+
+<div class="row col-sm-12">
+  <div class="col-sm-4">
+    <% if params[:type] == 'retry' %>
+      <input type="radio" name="retry" value="retry" checked disabled>
+    <% else %>
+      <input type="radio" name="retry" value="retry" disabled>
+    <% end %>
+    <a href="<%= request.base_url %>/search?type=retry">RetrySet</a>
+  </div>
+  <div class="col-sm-4">
+    <% if params[:type] == 'dead' %>
+      <input type="radio" name="dead" value="dead" checked disabled>
+    <% else %>
+      <input type="radio" name="dead" value="dead" disabled>
+    <% end %>
+    <a href="<%= request.base_url %>/search?type=dead">DeadSet</a>
+  </div>
+  <div class="col-sm-4">
+    <% if params[:type] == 'scheduled' %>
+      <input type="radio" name="scheduled" value="scheduled" checked disabled>
+    <% else %>
+      <input type="radio" name="scheduled" value="scheduled" disabled>
+    <% end %>
+    <a href="<%= request.base_url %>/search?type=scheduled">ScheduledSet</a>
+  </div>
+</div>
+
+<% if params[:type] %>
+  <% if !@jobs.nil? && @jobs.size > 0 %>
+    <% if params[:type] == 'retry' %>
+      <%= render(:erb, Sidekiq::AzSidekiq::ViewHelper.local_view('_retries_table.erb'), locals: { retries: @jobs } ) %>
+    <% elsif params[:type] == 'dead' %>
+      <%= render(:erb, Sidekiq::AzSidekiq::ViewHelper.local_view('_dead_table.erb'), locals: { dead: @jobs }) %>
+    <% elsif params[:type] == 'scheduled' %>
+      <%= render(:erb, Sidekiq::AzSidekiq::ViewHelper.local_view('_scheduled_table.erb'), locals: { scheduled: @jobs }) %>
+    <% end %>
+  <% else %>
+    <div class="alert alert-success">No jobs found</div>
+  <% end %>
+<% else %>
+  <div class="alert alert-info">Please select a typeset</div>
+<% end %>
